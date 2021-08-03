@@ -1,0 +1,65 @@
+# ARRAYS IN HIVE 
+vi employee.csv
+101,Amit , Hadoop:hHve:Spark:Big-data
+102,sumit,   HIVE:oozie:hadoop
+103,Rohit,   Kafka
+
+use sample_db;
+create table employee(
+id int,
+name string,
+Skills array<string>
+)
+row format delimited
+fields terminated by ','
+collection terminated by ':'
+;
+
+
+select * from employee;
+ output :
+101     Amit    ["Hadoop","Hive","Spark","Big-data"]
+102     sumit   ["Hive ","oozie","hadoop"]
+103     Rohit   ["Kafka"]
+
+select id,name , size(skills) from employee;
+output:
+
+101     Amit    4
+102     sumit   3
+103     Rohit   1
+
+select id, name, array_contains(skills,'Hadoop'),sort_array(skills) from employee ;
+output :
+
+101     Amit    true    ["Big-data","Hadoop","Hive","Spark"]
+102     sumit   false   ["Hive ","hadoop","oozie"]
+103     Rohit   false   ["Kafka"]
+
+select id , name , concat_ws("|", skills) as skill_set from employee;
+output:
+101     Amit    Hadoop|Hive|Spark|Big-data
+102     sumit   Hive |oozie|hadoop
+103     Rohit   Kafka
+
+select explode(skills) as skill_set from employee;
+output:
+Hadoop
+Hive
+Spark
+Big-data
+Hive
+oozie
+hadoop
+Kafka
+
+select id,name ,skill_set from employee lateral view explode(skills) set_1 as skill_set;
+output:
+101     Amit    Hadoop
+101     Amit    Hive
+101     Amit    Spark
+101     Amit    Big-data
+102     sumit   Hive
+102     sumit   oozie
+102     sumit   hadoop
+103     Rohit   Kafka
